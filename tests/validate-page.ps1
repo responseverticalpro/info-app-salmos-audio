@@ -128,6 +128,30 @@ if (-not $html.Contains('.authority-photo-wrap{flex:none;width:100%;min-height:0
 if (-not $html.Contains('.authority-photo{height:auto;object-fit:contain}')) {
     throw 'Foto mobile ainda pode ser recortada.'
 }
+$authorityBadgesMatch = [regex]::Match($html, '<div class="authority-badges">([\s\S]*?)</div><p class="authority-text">')
+if ($authorityBadgesMatch.Groups[1].Value.Contains('<strong>')) {
+    throw 'Os badges da autoridade ainda contêm strong.'
+}
+$expectedBadgeTexts = @(
+    '</span> 22 anos no minist',
+    '</span> 4.000+ horas',
+    '</span> 150 Salmos gravados',
+    '</span> 130+ igrejas'
+)
+foreach ($badgeText in $expectedBadgeTexts) {
+    if (-not $html.Contains($badgeText)) { throw 'Texto contínuo do badge ausente.' }
+}
+$bodyHtml = [regex]::Match($html, '<body>([\s\S]*?)</body>').Groups[1].Value
+$bodyWithoutScript = [regex]::Replace($bodyHtml, '<script>[\s\S]*?</script>', '')
+if ([regex]::IsMatch($bodyWithoutScript, '<(span|strong|em|a)\b[^>]*>[^<]*[\r\n]+[^<]*</\1>')) {
+    throw 'Quebra de linha encontrada dentro de tag inline.'
+}
+foreach ($textNodeMatch in [regex]::Matches($bodyWithoutScript, '>([^<]+)<')) {
+    $textNode = $textNodeMatch.Groups[1].Value
+    if ([regex]::IsMatch($textNode, '\S {2,}\S')) {
+        throw 'Espaço duplicado encontrado em texto visível.'
+    }
+}
 $images = [regex]::Matches($html, '<img\s[^>]*>')
 foreach ($imageTag in $images) {
     if (-not $imageTag.Value.Contains('loading="lazy"')) { throw 'Imagem sem lazy loading.' }
