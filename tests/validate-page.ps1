@@ -67,7 +67,7 @@ if (-not $html.Contains("toLocaleDateString('pt-BR')")) { throw 'Atualização a
 if (-not $html.Contains('faq-question-7')) { throw 'Sétima pergunta do FAQ ausente.' }
 if (-not $html.Contains('30 dias de garantia incondicional')) { throw 'Garantia de 30 dias ausente.' }
 if ([regex]::Matches($html, 'class="benefit-delivery"').Count -ne 6) { throw 'Nova seção precisa de 6 entregáveis.' }
-if (-not $html.Contains('<img src="autoridade.webp" alt="Pastor Marcos Antunes" class="authority-photo" loading="lazy">')) {
+if (-not $html.Contains('<img src="autoridade2_webp.webp" alt="Pastor Marcos Antunes" class="authority-photo" loading="lazy">')) {
     throw 'Nova foto da autoridade ausente.'
 }
 if ([regex]::Matches($html, 'class="authority-badge"').Count -ne 4) {
@@ -76,7 +76,7 @@ if ([regex]::Matches($html, 'class="authority-badge"').Count -ne 4) {
 foreach ($oldAuthorityClass in @('.authority-wrap', '.pastor-photo', '.authority-copy')) {
     if ($html.Contains($oldAuthorityClass)) { throw "Estilo antigo ainda existe: $oldAuthorityClass" }
 }
-if ($html.Contains('Playfair Display')) { throw 'Playfair Display ainda está referenciada.' }
+if ([regex]::Matches($html, 'Playfair Display').Count -ne 1) { throw 'Playfair Display deve ser usada somente na headline da autoridade.' }
 if (-not $html.Contains('Poppins:wght@600;700;800')) { throw 'Importação da Poppins ausente.' }
 if (-not $html.Contains('h1{font-size:clamp(1.7rem,5.5vw,2.6rem)')) { throw 'Escala desktop do H1 incorreta.' }
 if (-not $html.Contains('.section-title{font-size:clamp(1.4rem,4.5vw,2rem)')) { throw 'Escala dos títulos de seção incorreta.' }
@@ -103,11 +103,11 @@ foreach ($oldSocialSelector in @('.wa-grid','.wa-card','.wa-name','.wa-bubble','
     if ($html.Contains($oldSocialSelector)) { throw "Estilo social antigo ainda existe: $oldSocialSelector" }
 }
 if (-not $html.Contains('function updateCarousel()')) { throw 'JavaScript do carrossel ausente.' }
-if (-not $html.Contains('.carousel-slide{flex:0 0 92%}')) { throw 'Largura mobile do depoimento incorreta.' }
+if (-not $html.Contains('.carousel-slide{flex:0 0 95%}')) { throw 'Largura mobile do depoimento incorreta.' }
 if (-not $html.Contains('.carousel-slide{flex:0 0 calc(50% - 8px)}')) { throw 'Grade desktop de depoimentos incorreta.' }
 if (-not $html.Contains('.carousel-track{flex-wrap:wrap;transition:none}')) { throw 'Quebra desktop do track ausente.' }
 if (-not $html.Contains("return slides[0].offsetWidth + 16;")) { throw 'Gap do cálculo do carrossel incorreto.' }
-if (-not $html.Contains("track.style.transform = 'none';")) { throw 'Transform desktop não foi desativado.' }
+if (-not $html.Contains("track.style.transform = 'translateX(0)';")) { throw 'Transform desktop não foi resetado.' }
 $deadSelectors = @(
     '.deliverables', '.deliverable', '#entregaveis', '.placeholder-note',
     '.anchor', '.old-price', '.price', '.lifetime', '.included', '.pay-chip', '.payments'
@@ -128,6 +128,11 @@ if (-not $html.Contains('.authority-photo-wrap{flex:none;width:100%;min-height:0
 if (-not $html.Contains('.authority-photo{height:auto;object-fit:contain}')) {
     throw 'Foto mobile ainda pode ser recortada.'
 }
+if ($html.Contains('class="carousel-arrow')) { throw 'Setas antigas do carrossel ainda existem.' }
+if (-not $html.Contains('<div class="carousel-dots"></div>')) { throw 'Container de dots ausente.' }
+if (-not $html.Contains("document.createElement('button')")) { throw 'Geração dinâmica dos dots ausente.' }
+if (-not $html.Contains('.carousel-slide{flex:0 0 95%}')) { throw 'Largura mobile do carrossel incorreta.' }
+if (-not $html.Contains('white-space:nowrap')) { throw 'Badge vitalício ainda pode quebrar linha.' }
 $authorityBadgesMatch = [regex]::Match($html, '<div class="authority-badges">([\s\S]*?)</div><p class="authority-text">')
 if ($authorityBadgesMatch.Groups[1].Value.Contains('<strong>')) {
     throw 'Os badges da autoridade ainda contêm strong.'
@@ -171,6 +176,21 @@ if (-not $html.Contains('<img src="garantia30_webp.webp" alt="Garantia de 30 dia
 if ($html.Contains('<svg class="seal"')) { throw 'SVG antigo da garantia ainda existe.' }
 if (-not $html.Contains('.seal-img{display:block;width:120px;height:auto;margin:0 auto 22px}')) {
     throw 'Estilo da imagem de garantia ausente.'
+}
+if (-not $html.Contains('family=Playfair+Display:ital,wght@1,700')) {
+    throw 'Fonte Playfair Display itálica 700 ausente.'
+}
+if (-not $html.Contains('<h2 class="authority-headline">Quem sou eu?</h2><div class="authority-card card">')) {
+    throw 'Headline da seção de autoridade ausente ou fora da posição esperada.'
+}
+if (-not $html.Contains('<img src="autoridade2_webp.webp" alt="Pastor Marcos Antunes" class="authority-photo" loading="lazy">')) {
+    throw 'Nova foto da autoridade ausente.'
+}
+if (-not $html.Contains('.authority-headline{text-align:center;font-family:"Playfair Display",Georgia,serif;font-size:clamp(1.6rem,5vw,2.2rem);font-weight:700;font-style:italic;color:#F5F5F5;margin:0 auto 28px;letter-spacing:-.01em}')) {
+    throw 'Estilo da headline da autoridade ausente.'
+}
+if (-not $html.Contains('.authority-headline{font-size:1.4rem;margin-bottom:20px}')) {
+    throw 'Ajuste mobile da headline da autoridade ausente.'
 }
 $checkoutUrl = 'https://lastlink.com/p/CCB863B59/checkout-payment/'
 if ([regex]::Matches($html, 'href="' + [regex]::Escape($checkoutUrl) + '"').Count -ne 3) {
