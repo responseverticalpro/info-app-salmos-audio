@@ -76,7 +76,7 @@ if ([regex]::Matches($html, 'class="authority-badge"').Count -ne 4) {
 foreach ($oldAuthorityClass in @('.authority-wrap', '.pastor-photo', '.authority-copy')) {
     if ($html.Contains($oldAuthorityClass)) { throw "Estilo antigo ainda existe: $oldAuthorityClass" }
 }
-if ([regex]::Matches($html, 'Playfair Display').Count -ne 1) { throw 'Playfair Display deve ser usada somente na headline da autoridade.' }
+if ($html.Contains('Playfair Display') -or $html.Contains('Playfair+Display')) { throw 'Playfair Display não deve mais ser carregada.' }
 if (-not $html.Contains('Poppins:wght@600;700;800')) { throw 'Importação da Poppins ausente.' }
 if (-not $html.Contains('h1{font-size:clamp(1.7rem,5.5vw,2.6rem)')) { throw 'Escala desktop do H1 incorreta.' }
 if (-not $html.Contains('.section-title{font-size:clamp(1.4rem,4.5vw,2rem)')) { throw 'Escala dos títulos de seção incorreta.' }
@@ -91,6 +91,19 @@ if (-not $html.Contains('Sua casa tem ouvido mais o barulho do mundo do que a vo
 }
 if (-not $html.Contains('3 minutos por dia.')) {
     throw 'Novo subtítulo do hero ausente.'
+}
+if (-not $html.Contains('transformando o seu ambiente e a sua vida.</p><p class="hero-cta-play">') -or
+    -not $html.Contains('Aperte o play e escute como os Salmos podem transformar o seu dia:</p><div class="audio-grid">')) {
+    throw 'Nova transição entre o subtítulo do hero e os players ausente.'
+}
+if ($html.Contains('3 minutos por dia. Ouça agora:')) {
+    throw 'A chamada antiga Ouça agora ainda existe no subtítulo do hero.'
+}
+if (-not $html.Contains('.hero-cta-play{text-align:center;color:var(--gold-soft);font-size:clamp(.95rem,2.5vw,1.1rem);font-weight:700;margin:0 auto 24px;max-width:600px}')) {
+    throw 'Estilo da nova chamada dos players ausente.'
+}
+if (-not $html.Contains('.hero-cta-play{font-size:.92rem;margin-bottom:20px}')) {
+    throw 'Estilo mobile da nova chamada dos players ausente.'
 }
 if ($html.Contains('id="prova-social-2"')) { throw 'A segunda prova social ainda existe.' }
 if ([regex]::Matches($html, 'class="carousel-slide"').Count -ne 4) {
@@ -177,20 +190,23 @@ if ($html.Contains('<svg class="seal"')) { throw 'SVG antigo da garantia ainda e
 if (-not $html.Contains('.seal-img{display:block;width:120px;height:auto;margin:0 auto 22px}')) {
     throw 'Estilo da imagem de garantia ausente.'
 }
-if (-not $html.Contains('family=Playfair+Display:ital,wght@1,700')) {
-    throw 'Fonte Playfair Display itálica 700 ausente.'
-}
-if (-not $html.Contains('<h2 class="authority-headline">Quem sou eu?</h2><div class="authority-card card">')) {
-    throw 'Headline da seção de autoridade ausente ou fora da posição esperada.'
+if (-not $html.Contains('<div class="authority-card card"><div class="authority-layout">')) {
+    throw 'Layout da autoridade não começa diretamente dentro do card.'
 }
 if (-not $html.Contains('<img src="autoridade2_webp.webp" alt="Pastor Marcos Antunes" class="authority-photo" loading="lazy">')) {
     throw 'Nova foto da autoridade ausente.'
 }
-if (-not $html.Contains('.authority-headline{text-align:center;font-family:"Playfair Display",Georgia,serif;font-size:clamp(1.6rem,5vw,2.2rem);font-weight:700;font-style:italic;color:#F5F5F5;margin:0 auto 28px;letter-spacing:-.01em}')) {
-    throw 'Estilo da headline da autoridade ausente.'
+if ($html.Contains('authority-headline') -or $html.Contains('Quem sou eu?')) {
+    throw 'O título Quem sou eu ainda existe na página.'
 }
-if (-not $html.Contains('.authority-headline{font-size:1.4rem;margin-bottom:20px}')) {
-    throw 'Ajuste mobile da headline da autoridade ausente.'
+if (-not $html.Contains('.authority-photo-wrap{flex:0 0 35%;display:flex;align-items:flex-end;overflow:hidden}')) {
+    throw 'A foto da autoridade não ocupa 35% do card no desktop.'
+}
+if (-not $html.Contains('.authority-photo{width:100%;height:auto;object-fit:contain;object-position:center top;display:block}')) {
+    throw 'A foto da autoridade não está configurada para aparecer inteira.'
+}
+if ($html.Contains('.authority-photo-wrap{flex:0 0 280px') -or $html.Contains('object-fit:cover')) {
+    throw 'O layout antigo com foto cortada ainda existe.'
 }
 $checkoutUrl = 'https://lastlink.com/p/CCB863B59/checkout-payment/'
 if ([regex]::Matches($html, 'href="' + [regex]::Escape($checkoutUrl) + '"').Count -ne 3) {
